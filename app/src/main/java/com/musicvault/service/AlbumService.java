@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -74,7 +75,6 @@ public class AlbumService {
 
         return jdbcTemplate.query(
                 sql.toString(),
-                params.toArray(),
                 (rs, rowNum) -> new AlbumSummaryDto(
                         rs.getInt("album_id"),
                         rs.getString("title"),
@@ -84,10 +84,15 @@ public class AlbumService {
                         getDouble(rs, "avg_rating"),
                         rs.getLong("rating_count"),
                         rs.getString("artists"),
-                        rs.getString("genres")));
+                        rs.getString("genres")),
+                params.toArray());
     }
 
     public Optional<AlbumDetailDto> getAlbumDetail(Integer albumId) {
+        return getAlbumDetail(albumId, null, null);
+    }
+
+    public Optional<AlbumDetailDto> getAlbumDetail(Integer albumId, Integer currentUserId, Integer editReviewId) {
         Optional<Album> albumOptional = albumRepository.findById(albumId);
         if (albumOptional.isEmpty()) {
             return Optional.empty();
@@ -114,6 +119,22 @@ public class AlbumService {
                     }
                 },
                 albumId);
+
+        if (currentUserId != null) {
+            jdbcTemplate.query(
+                    """
+                            SELECT score
+                            FROM Rates
+                            WHERE album_id = ? AND user_id = ?
+                            """,
+                    rs -> {
+                        if (rs.next()) {
+                            detail.setCurrentUserRating(getDouble(rs, "score"));
+                        }
+                    },
+                    albumId,
+                    currentUserId);
+        }
 
         detail.getArtists().addAll(jdbcTemplate.query(
                 """
@@ -151,7 +172,7 @@ public class AlbumService {
                 albumId));
 
         Set<String> seenServices = new LinkedHashSet<>();
-        jdbcTemplate.query(
+        List<AlbumDetailDto.StreamingLinkDto> streamingLinks = jdbcTemplate.query(
                 """
                         SELECT ss.name, ao.external_url
                         FROM AvailableOn ao
@@ -159,19 +180,110 @@ public class AlbumService {
                         WHERE ao.album_id = ?
                         ORDER BY ss.name
                         """,
-                rs -> {
-                    while (rs.next()) {
-                        String service = rs.getString("name");
-                        if (seenServices.add(service)) {
-                            detail.getStreamingLinks().add(new AlbumDetailDto.StreamingLinkDto(
-                                    service,
-                                    rs.getString("external_url")));
-                        }
-                    }
-                },
+                (rs, rowNum) -> new AlbumDetailDto.StreamingLinkDto(
+                        rs.getString("name"),
+                        rs.getString("external_url")),
                 albumId);
+        for (AlbumDetailDto.StreamingLinkDto link : streamingLinks) {
+            if (seenServices.add(link.getServiceName())) {
+                detail.getStreamingLinks().add(link);
+            }
+        }
+
+        detail.getReviews().addAll(jdbcTemplate.query(
+                """
+                        SELECT r.review_id, r.content, r.post_date, u.username,
+                               CASE WHEN r.author_id = ? THEN 1 ELSE 0 END AS own_review
+                        FROM Review r
+                        JOIN User u ON r.author_id = u.user_id
+                        WHERE r.album_id = ?
+                        ORDER BY r.post_date DESC, r.review_id DESC
+                        """,
+                (rs, rowNum) -> new AlbumDetailDto.ReviewDto(
+                        rs.getInt("review_id"),
+                        rs.getString("content"),
+                        getLocalDate(rs, "post_date"),
+                        rs.getString("username"),
+                        rs.getInt("own_review") == 1),
+                currentUserId == null ? -1 : currentUserId,
+                albumId));
+
+        if (currentUserId != null && editReviewId != null) {
+            List<AlbumDetailDto.ReviewDto> editableReviews = jdbcTemplate.query(
+                    """
+                            SELECT review_id, content, post_date
+                            FROM Review
+                            WHERE review_id = ? AND album_id = ? AND author_id = ?
+                            """,
+                    (rs, rowNum) -> new AlbumDetailDto.ReviewDto(
+                            rs.getInt("review_id"),
+                            rs.getString("content"),
+                            getLocalDate(rs, "post_date"),
+                            null,
+                            true),
+                    editReviewId,
+                    albumId,
+                    currentUserId);
+            if (!editableReviews.isEmpty()) {
+                detail.setEditableReview(editableReviews.get(0));
+            }
+        }
 
         return Optional.of(detail);
+    }
+
+    public void saveRating(Integer albumId, Integer userId, Double score) {
+        jdbcTemplate.update(
+                """
+                        INSERT INTO Rates (user_id, album_id, score, rated_at)
+                        VALUES (?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE score = VALUES(score), rated_at = VALUES(rated_at)
+                        """,
+                userId,
+                albumId,
+                score,
+                LocalDateTime.now());
+    }
+
+    public void deleteRating(Integer albumId, Integer userId) {
+        jdbcTemplate.update(
+                "DELETE FROM Rates WHERE album_id = ? AND user_id = ?",
+                albumId,
+                userId);
+    }
+
+    public void createReview(Integer albumId, Integer userId, String content) {
+        jdbcTemplate.update(
+                """
+                        INSERT INTO Review (content, post_date, author_id, album_id, moderated_by)
+                        VALUES (?, ?, ?, ?, NULL)
+                        """,
+                content,
+                LocalDate.now(),
+                userId,
+                albumId);
+    }
+
+    public void updateReview(Integer reviewId, Integer albumId, Integer userId, String content) {
+        jdbcTemplate.update(
+                """
+                        UPDATE Review
+                        SET content = ?, post_date = ?
+                        WHERE review_id = ? AND album_id = ? AND author_id = ?
+                        """,
+                content,
+                LocalDate.now(),
+                reviewId,
+                albumId,
+                userId);
+    }
+
+    public void deleteReview(Integer reviewId, Integer albumId, Integer userId) {
+        jdbcTemplate.update(
+                "DELETE FROM Review WHERE review_id = ? AND album_id = ? AND author_id = ?",
+                reviewId,
+                albumId,
+                userId);
     }
 
     private static LocalDate getLocalDate(ResultSet rs, String column) throws SQLException {

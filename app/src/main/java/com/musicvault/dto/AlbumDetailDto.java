@@ -14,10 +14,13 @@ public class AlbumDetailDto {
     private String releaseType;
     private Double avgRating;
     private Long ratingCount;
+    private Double currentUserRating;
+    private ReviewDto editableReview;
     private final List<String> artists = new ArrayList<>();
     private final List<String> genres = new ArrayList<>();
     private final List<TrackDto> tracks = new ArrayList<>();
     private final List<StreamingLinkDto> streamingLinks = new ArrayList<>();
+    private final List<ReviewDto> reviews = new ArrayList<>();
 
     public Integer getAlbumId() {
         return albumId;
@@ -75,6 +78,22 @@ public class AlbumDetailDto {
         this.ratingCount = ratingCount;
     }
 
+    public Double getCurrentUserRating() {
+        return currentUserRating;
+    }
+
+    public void setCurrentUserRating(Double currentUserRating) {
+        this.currentUserRating = currentUserRating;
+    }
+
+    public ReviewDto getEditableReview() {
+        return editableReview;
+    }
+
+    public void setEditableReview(ReviewDto editableReview) {
+        this.editableReview = editableReview;
+    }
+
     public List<String> getArtists() {
         return artists;
     }
@@ -89,6 +108,10 @@ public class AlbumDetailDto {
 
     public List<StreamingLinkDto> getStreamingLinks() {
         return streamingLinks;
+    }
+
+    public List<ReviewDto> getReviews() {
+        return reviews;
     }
 
     public static class TrackDto {
@@ -130,6 +153,47 @@ public class AlbumDetailDto {
 
         public String getExternalUrl() {
             return externalUrl;
+        }
+    }
+
+    public static class ReviewDto {
+        private final Integer reviewId;
+        private final String content;
+        private final LocalDate postDate;
+        private final String authorUsername;
+        private final boolean ownReview;
+
+        public ReviewDto(
+                Integer reviewId,
+                String content,
+                LocalDate postDate,
+                String authorUsername,
+                boolean ownReview) {
+            this.reviewId = reviewId;
+            this.content = content;
+            this.postDate = postDate;
+            this.authorUsername = authorUsername;
+            this.ownReview = ownReview;
+        }
+
+        public Integer getReviewId() {
+            return reviewId;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public LocalDate getPostDate() {
+            return postDate;
+        }
+
+        public String getAuthorUsername() {
+            return authorUsername;
+        }
+
+        public boolean isOwnReview() {
+            return ownReview;
         }
     }
 }

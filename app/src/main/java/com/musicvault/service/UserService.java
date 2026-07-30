@@ -6,6 +6,7 @@ import com.musicvault.model.User;
 import com.musicvault.repository.RegisteredUserRepository;
 import com.musicvault.repository.UserRepository;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,10 @@ public class UserService {
 
     public boolean emailExists(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    public Optional<Integer> findUserIdByUsername(String username) {
+        return userRepository.findByUsername(username).map(user -> user.getUserId());
     }
 
     @Transactional
