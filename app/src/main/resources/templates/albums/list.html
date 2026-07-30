@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Browse Albums · MusicVault</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" th:href="@{/albums}">MusicVault</a>
+        <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <a class="nav-link" th:href="@{/albums}">Browse Albums</a>
+            <span sec:authorize="!isAuthenticated()">
+                <a class="nav-link" th:href="@{/login}">Login</a>
+                <a class="nav-link" th:href="@{/register}">Register</a>
+            </span>
+            <span sec:authorize="isAuthenticated()" class="d-flex align-items-center">
+                <span class="navbar-text text-light small me-2">
+                    Signed in as <strong sec:authentication="name">user</strong>
+                </span>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                </form>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<main class="container pb-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h2 mb-1">Browse Albums</h1>
+            <p class="text-muted mb-0">Search by title, artist, genre, release year, or record label.</p>
+        </div>
+        <form class="d-flex gap-2" th:action="@{/albums}" method="get">
+            <input class="form-control" type="search" name="q" placeholder="Search albums..."
+                   th:value="${query}">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+    </div>
+
+    <div th:if="${#lists.isEmpty(albums)}" class="alert alert-info">
+        No albums matched your search.
+    </div>
+
+    <div class="row g-4" th:if="${!#lists.isEmpty(albums)}">
+        <div class="col-md-6 col-lg-4" th:each="album : ${albums}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 card-title">
+                        <a th:href="@{/albums/{id}(id=${album.albumId})}" th:text="${album.title}">Album</a>
+                    </h2>
+                    <p class="card-text small text-muted mb-2">
+                        <span th:text="${album.releaseDate != null ? album.releaseDate : 'Unknown date'}">2024</span>
+                        · <span th:text="${album.releaseType}">Album</span>
+                    </p>
+                    <p class="card-text small mb-1" th:if="${album.artists != null}">
+                        <strong>Artists:</strong> <span th:text="${album.artists}">Artist</span>
+                    </p>
+                    <p class="card-text small mb-1" th:if="${album.genres != null}">
+                        <strong>Genres:</strong> <span th:text="${album.genres}">Genre</span>
+                    </p>
+                    <p class="card-text small mb-1" th:if="${album.recordLabel != null}">
+                        <strong>Label:</strong> <span th:text="${album.recordLabel}">Label</span>
+                    </p>
+                    <p class="card-text mb-0">
+                        <span class="badge text-bg-warning text-dark"
+                              th:if="${album.avgRating != null}"
+                              th:text="${album.avgRating + ' ★ (' + album.ratingCount + ')'}">4.5 ★</span>
+                        <span class="badge text-bg-secondary" th:if="${album.avgRating == null}">No ratings yet</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

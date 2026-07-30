@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${album.title + ' · MusicVault'}">Album Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" th:href="@{/albums}">MusicVault</a>
+        <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <a class="nav-link" th:href="@{/albums}">Browse Albums</a>
+            <span sec:authorize="!isAuthenticated()">
+                <a class="nav-link" th:href="@{/login}">Login</a>
+                <a class="nav-link" th:href="@{/register}">Register</a>
+            </span>
+            <span sec:authorize="isAuthenticated()" class="d-flex align-items-center">
+                <span class="navbar-text text-light small me-2">
+                    Signed in as <strong sec:authentication="name">user</strong>
+                </span>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                </form>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<main class="container pb-5">
+    <a class="btn btn-link ps-0 mb-3" th:href="@{/albums}">&larr; Back to albums</a>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <h1 class="h2" th:text="${album.title}">Album Title</h1>
+            <p class="text-muted">
+                <span th:text="${album.releaseDate != null ? album.releaseDate : 'Unknown date'}">2024</span>
+                · <span th:text="${album.releaseType}">Album</span>
+                · <span th:text="${album.recordLabel != null ? album.recordLabel : 'Independent'}">Label</span>
+            </p>
+
+            <p th:if="${album.avgRating != null}">
+                <span class="badge text-bg-warning text-dark fs-6"
+                      th:text="${album.avgRating + ' ★ average (' + album.ratingCount + ' ratings)'}">4.5 ★</span>
+            </p>
+
+            <div class="mb-4" th:if="${!#lists.isEmpty(album.artists)}">
+                <h2 class="h5">Artists</h2>
+                <ul class="mb-0">
+                    <li th:each="artist : ${album.artists}" th:text="${artist}">Artist</li>
+                </ul>
+            </div>
+
+            <div class="mb-4" th:if="${!#lists.isEmpty(album.genres)}">
+                <h2 class="h5">Genres</h2>
+                <div>
+                    <span class="badge text-bg-light border me-1 mb-1"
+                          th:each="genre : ${album.genres}"
+                          th:text="${genre}">Rock</span>
+                </div>
+            </div>
+
+            <div class="mb-4" th:if="${!#lists.isEmpty(album.tracks)}">
+                <h2 class="h5">Track Listing</h2>
+                <table class="table table-sm align-middle">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Duration</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="track : ${album.tracks}">
+                        <td th:text="${track.trackNo}">1</td>
+                        <td th:text="${track.title}">Track</td>
+                        <td th:text="${track.duration != null ? track.duration : '--:--'}">00:00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm" th:if="${!#lists.isEmpty(album.streamingLinks)}">
+                <div class="card-body">
+                    <h2 class="h5 card-title">Streaming</h2>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2" th:each="link : ${album.streamingLinks}">
+                            <a th:href="${link.externalUrl}" th:text="${link.serviceName}" target="_blank" rel="noopener">Spotify</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
