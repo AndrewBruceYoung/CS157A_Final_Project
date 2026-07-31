@@ -134,6 +134,24 @@ public class AlbumService {
                     },
                     albumId,
                     currentUserId);
+
+            detail.getCurrentUserSaveStatuses().addAll(jdbcTemplate.query(
+                    "SELECT status FROM Saves WHERE user_id = ? AND album_id = ?",
+                    (rs, rowNum) -> rs.getString("status"),
+                    currentUserId,
+                    albumId));
+
+            detail.getCurrentUserLists().addAll(jdbcTemplate.query(
+                    """
+                            SELECT list_id, name
+                            FROM AlbumList
+                            WHERE user_id = ?
+                            ORDER BY name
+                            """,
+                    (rs, rowNum) -> new AlbumDetailDto.UserListOptionDto(
+                            rs.getInt("list_id"),
+                            rs.getString("name")),
+                    currentUserId));
         }
 
         detail.getArtists().addAll(jdbcTemplate.query(

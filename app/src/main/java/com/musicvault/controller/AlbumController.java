@@ -2,6 +2,7 @@ package com.musicvault.controller;
 
 import com.musicvault.dto.AlbumSummaryDto;
 import com.musicvault.service.AlbumService;
+import com.musicvault.service.SaveService;
 import com.musicvault.service.UserService;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +44,7 @@ public class AlbumController {
         return albumService.getAlbumDetail(id, currentUserId(authentication).orElse(null), editReview)
                 .map(album -> {
                     model.addAttribute("album", album);
+                    model.addAttribute("saveStatuses", SaveService.STATUSES);
                     return "albums/detail";
                 })
                 .orElse("redirect:/albums");

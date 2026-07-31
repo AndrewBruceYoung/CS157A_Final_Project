@@ -9,26 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand fw-semibold" th:href="@{/albums}">MusicVault</a>
-        <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-            <a class="nav-link" th:href="@{/albums}">Browse Albums</a>
-            <span sec:authorize="!isAuthenticated()">
-                <a class="nav-link" th:href="@{/login}">Login</a>
-                <a class="nav-link" th:href="@{/register}">Register</a>
-            </span>
-            <span sec:authorize="isAuthenticated()" class="d-flex align-items-center">
-                <span class="navbar-text text-light small me-2">
-                    Signed in as <strong sec:authentication="name">user</strong>
-                </span>
-                <form th:action="@{/logout}" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-                </form>
-            </span>
-        </div>
-    </div>
-</nav>
+<div th:replace="~{fragments/nav :: navbar}"></div>
 
 <main class="container pb-5">
     <a class="btn btn-link ps-0 mb-3" th:href="@{/albums}">&larr; Back to albums</a>
@@ -70,6 +51,53 @@
                           th:action="@{/albums/{id}/rating/delete(id=${album.albumId})}" method="post">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <button class="btn btn-outline-danger btn-sm" type="submit">Remove Rating</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4" sec:authorize="isAuthenticated()">
+                <div class="card-body">
+                    <h2 class="h5">Save Album</h2>
+                    <div class="d-flex flex-wrap gap-2">
+                        <th:block th:each="status : ${saveStatuses}">
+                            <form th:if="${!#sets.contains(album.currentUserSaveStatuses, status)}"
+                                  th:action="@{/saves/albums/{albumId}/add(albumId=${album.albumId})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="status" th:value="${status}">
+                                <button class="btn btn-outline-primary btn-sm" type="submit"
+                                        th:text="${'Add to ' + status}">Add</button>
+                            </form>
+                            <form th:if="${#sets.contains(album.currentUserSaveStatuses, status)}"
+                                  th:action="@{/saves/albums/{albumId}/remove(albumId=${album.albumId})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <input type="hidden" name="status" th:value="${status}">
+                                <button class="btn btn-primary btn-sm" type="submit"
+                                        th:text="${'Remove from ' + status}">Remove</button>
+                            </form>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4" sec:authorize="isAuthenticated()"
+                 th:if="${!#lists.isEmpty(album.currentUserLists)}">
+                <div class="card-body">
+                    <h2 class="h5">Add to List</h2>
+                    <form class="row g-2 align-items-end" th:action="@{/lists/add-album}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <input type="hidden" name="albumId" th:value="${album.albumId}">
+                        <input type="hidden" name="redirect" value="album">
+                        <div class="col-sm-6">
+                            <label class="form-label" for="listId">List</label>
+                            <select class="form-select" id="listId" name="listId" required>
+                                <option th:each="listOption : ${album.currentUserLists}"
+                                        th:value="${listOption.listId}"
+                                        th:text="${listOption.name}">List</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-auto">
+                            <button class="btn btn-primary" type="submit">Add to List</button>
+                        </div>
                     </form>
                 </div>
             </div>

@@ -3,7 +3,9 @@ package com.musicvault.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AlbumDetailDto {
 
@@ -16,6 +18,8 @@ public class AlbumDetailDto {
     private Long ratingCount;
     private Double currentUserRating;
     private ReviewDto editableReview;
+    private final Set<String> currentUserSaveStatuses = new HashSet<>();
+    private final List<UserListOptionDto> currentUserLists = new ArrayList<>();
     private final List<String> artists = new ArrayList<>();
     private final List<String> genres = new ArrayList<>();
     private final List<TrackDto> tracks = new ArrayList<>();
@@ -112,6 +116,32 @@ public class AlbumDetailDto {
 
     public List<ReviewDto> getReviews() {
         return reviews;
+    }
+
+    public Set<String> getCurrentUserSaveStatuses() {
+        return currentUserSaveStatuses;
+    }
+
+    public List<UserListOptionDto> getCurrentUserLists() {
+        return currentUserLists;
+    }
+
+    public static class UserListOptionDto {
+        private final Integer listId;
+        private final String name;
+
+        public UserListOptionDto(Integer listId, String name) {
+            this.listId = listId;
+            this.name = name;
+        }
+
+        public Integer getListId() {
+            return listId;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
     public static class TrackDto {

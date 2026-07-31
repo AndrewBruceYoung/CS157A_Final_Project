@@ -92,13 +92,13 @@ The real-world problem it addresses: most existing streaming services are built 
 
 ### 5.2 Normalization to BCNF
 
-Our final schema is normalized to BCNF. For each relation, every non-trivial functional dependency has a determinant that is a superkey. We validated this relation-by-relation:
+Our final schema is normalized to BCNF. For each relation, every non-trivial functional dependency has a determinant which is a superkey. We made sure this is relation-by-relation:
 
 - **User, RegisteredUser, Administrator:**  
-  `user_id` functionally determines all non-key attributes in each table. Subclass attributes were separated from `User` to avoid nullable role-specific columns and update anomalies.
+  `user_id` functionally determines all non-key attributes in each table. Subclass attributes were separated from `User`
 
 - **Lookup/catalog tables (ReleaseType, Genre, StreamingService, ArtistRole, RecordLabel, Artist):**  
-  Each table has a single key (`type_id`, `genre_id`, `service_id`, `role_name`, `label_id`, `artist_id`) that determines the remaining attributes. Unique constraints on names in lookup tables prevent duplicate semantic values.
+  Each table has a single key (`type_id`, `genre_id`, `service_id`, `role_name`, `label_id`, `artist_id`) that defines the remaining attributes.
 
 - **Album and weak entity Track:**  
   In `Album`, `album_id` determines title/date/cover/label/type.  
@@ -115,11 +115,11 @@ Our final schema is normalized to BCNF. For each relation, every non-trivial fun
   - `ListAlbum(list_id, album_id) -> position` with `UNIQUE(list_id, position)` for ordering integrity
   - `AlbumGenre`, `AvailableOn`, and `CreditedOn` follow the same BCNF pattern for M:N / ternary relationships
 
-This design eliminates partial and transitive dependencies by construction. We intentionally keep derived values (such as average rating) out of base tables and compute them in queries/application logic to avoid redundancy and inconsistency.
+This design gets rid of partial and transitive dependencies . We intentionally keep derived values out of base tables and compute them in queries/application logic to avoid redundancy and inconsistency.
 
 ### 5.3 Indexing
 
-To meet our non-functional performance goal, we added explicit indexes on frequent search filters and join paths (`sql/03_indexes.sql`):
+ we added explicit indexes on frequent search filters and join paths (`sql/03_indexes.sql`):
 
 - **Search-oriented indexes**
   - `idx_user_username` on `User(username)`
@@ -138,7 +138,7 @@ To meet our non-functional performance goal, we added explicit indexes on freque
   - `idx_credited_on_artist_id`
   - `idx_list_album_album_id`
 
-These indexes target our core workloads: album browsing/search, album detail pages with multi-table joins, rating/review lookups, and user list/collection operations. Primary keys and unique constraints already provide clustered access for key-based retrieval; the added secondary indexes reduce full scans on non-key filters and high-frequency join columns.
+These indexes target our  workloads: album browsing/search, album detail pages with multi-table joins, rating/review lookups, and user list/collection operations. Primary keys and unique constraints  provide clustered access for key-based retrieval
 
 ---
 

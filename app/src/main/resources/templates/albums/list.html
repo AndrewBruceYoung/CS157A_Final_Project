@@ -9,26 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand fw-semibold" th:href="@{/albums}">MusicVault</a>
-        <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-            <a class="nav-link" th:href="@{/albums}">Browse Albums</a>
-            <span sec:authorize="!isAuthenticated()">
-                <a class="nav-link" th:href="@{/login}">Login</a>
-                <a class="nav-link" th:href="@{/register}">Register</a>
-            </span>
-            <span sec:authorize="isAuthenticated()" class="d-flex align-items-center">
-                <span class="navbar-text text-light small me-2">
-                    Signed in as <strong sec:authentication="name">user</strong>
-                </span>
-                <form th:action="@{/logout}" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-                </form>
-            </span>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/nav :: navbar}"></nav>
 
 <main class="container pb-5">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">

@@ -2,6 +2,7 @@ package com.musicvault.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,6 +18,10 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/albums/**", "/register", "/login", "/css/**", "/js/**")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users", "/users/*")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/lists/*")
                         .permitAll()
                         .anyRequest()
                         .authenticated())

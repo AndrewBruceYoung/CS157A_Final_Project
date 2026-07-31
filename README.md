@@ -1,6 +1,6 @@
 # MusicVault — CS157A Final Project
 
-Music catalog platform with album browse/search, ratings, and user accounts.
+Music catalog platform with album browse/search, ratings, reviews, lists, saves, and follows.
 
 ## Setup
 
@@ -18,3 +18,10 @@ cd app && ./mvnw spring-boot:run
 Open http://localhost:8080/albums
 
 Demo users: `alice`, `bob`, `carol` — password `password`
+
+## Features to try
+
+- Browse/search albums, rate and review (album detail page)
+- Save albums as Owned / Favorite / Wishlist (`/saves`)
+- Create and manage album lists (`/lists`)
+- Browse users and follow/unfollow (`/users`)
