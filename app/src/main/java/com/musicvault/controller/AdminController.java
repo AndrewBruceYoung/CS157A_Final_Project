@@ -32,7 +32,6 @@ public class AdminController {
         return "admin/dashboard";
     }
 
-    // --- Genres ---
 
     @GetMapping("/genres")
     public String genres(Model model) {
@@ -72,7 +71,6 @@ public class AdminController {
         return "redirect:/admin/genres";
     }
 
-    // --- Labels ---
 
     @GetMapping("/labels")
     public String labels(Model model) {
@@ -112,7 +110,6 @@ public class AdminController {
         return "redirect:/admin/labels";
     }
 
-    // --- Release types ---
 
     @GetMapping("/release-types")
     public String releaseTypes(Model model) {
@@ -152,7 +149,6 @@ public class AdminController {
         return "redirect:/admin/release-types";
     }
 
-    // --- Streaming services ---
 
     @GetMapping("/streaming-services")
     public String streamingServices(Model model) {
@@ -192,7 +188,6 @@ public class AdminController {
         return "redirect:/admin/streaming-services";
     }
 
-    // --- Artists ---
 
     @GetMapping("/artists")
     public String artists(Model model) {
@@ -232,7 +227,6 @@ public class AdminController {
         return "redirect:/admin/artists";
     }
 
-    // --- Albums ---
 
     @GetMapping("/albums")
     public String albums(Model model) {
@@ -349,7 +343,6 @@ public class AdminController {
         return "redirect:/admin/albums/" + id;
     }
 
-    // --- Reviews ---
 
     @GetMapping("/reviews")
     public String reviews(Model model) {
@@ -399,7 +392,6 @@ public class AdminController {
         if (value == null || value.isBlank()) {
             return null;
         }
-        // Accept HH:MM or HH:MM:SS
         if (value.length() == 5) {
             return LocalTime.parse(value + ":00");
         }

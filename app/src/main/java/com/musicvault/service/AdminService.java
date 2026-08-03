@@ -30,7 +30,6 @@ public class AdminService {
         return count != null && count > 0;
     }
 
-    // --- Lookup tables ---
 
     public List<IdNameDto> listGenres() {
         return listIdName("Genre", "genre_id", "name");
@@ -112,7 +111,6 @@ public class AdminService {
         jdbcTemplate.update("DELETE FROM Artist WHERE artist_id = ?", id);
     }
 
-    // --- Albums ---
 
     public List<AdminAlbumDto> listAlbums() {
         return jdbcTemplate.query(
@@ -265,7 +263,6 @@ public class AdminService {
                 genreId);
     }
 
-    // --- Reviews ---
 
     public List<AdminReviewDto> listReviews() {
         return jdbcTemplate.query(
