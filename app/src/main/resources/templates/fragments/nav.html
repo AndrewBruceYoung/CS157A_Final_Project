@@ -10,6 +10,7 @@
             <a class="nav-link" th:href="@{/users}">Users</a>
             <a class="nav-link" sec:authorize="isAuthenticated()" th:href="@{/lists}">My Lists</a>
             <a class="nav-link" sec:authorize="isAuthenticated()" th:href="@{/saves}">My Saves</a>
+            <a class="nav-link" sec:authorize="hasRole('ADMIN')" th:href="@{/admin}">Admin</a>
             <span sec:authorize="!isAuthenticated()">
                 <a class="nav-link" th:href="@{/login}">Login</a>
                 <a class="nav-link" th:href="@{/register}">Register</a>

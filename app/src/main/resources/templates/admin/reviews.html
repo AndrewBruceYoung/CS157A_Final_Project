@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reviews · Admin · MusicVault</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="container pb-5">
+    <a class="btn btn-link ps-0 mb-3" th:href="@{/admin}">&larr; Admin dashboard</a>
+    <h1 class="h2 mb-3">Moderate Reviews</h1>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}">Error</div>
+
+    <div th:if="${#lists.isEmpty(reviews)}" class="text-muted">No reviews in the database.</div>
+
+    <div class="card shadow-sm mb-3" th:each="review : ${reviews}">
+        <div class="card-body">
+            <div class="d-flex justify-content-between gap-3">
+                <div>
+                    <strong th:text="${review.authorUsername}">author</strong>
+                    <span class="text-muted small"
+                          th:text="${' on ' + review.albumTitle + ' · ' + review.postDate}">album · date</span>
+                    <p class="mb-0 mt-2" th:text="${review.content}">Content</p>
+                </div>
+                <form th:action="@{/admin/reviews/{id}/delete(id=${review.reviewId})}" method="post"
+                      onsubmit="return confirm('Remove this review?');">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">Remove</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
